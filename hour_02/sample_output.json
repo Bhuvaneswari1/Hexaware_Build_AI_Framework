@@ -1,0 +1,23 @@
+{
+  "thread_id": "h2-example",
+  "status": "answered",
+  "answer": "carry forward: Employees may carry forward up to 5 unused annual leave days into the next year.",
+  "citations": [
+    "LEAVE-02"
+  ],
+  "evidence": [
+    {
+      "tool": "policy_search",
+      "result": [
+        {
+          "policy_id": "LEAVE-02",
+          "text": "carry forward: Employees may carry forward up to 5 unused annual leave days into the next year."
+        },
+        {
+          "policy_id": "PAY-01",
+          "text": "payroll: Monthly payroll is scheduled for the last working day of the month. The payroll lookup returns the synthetic current pay record."
+        }
+      ]
+    }
+  ]
+}

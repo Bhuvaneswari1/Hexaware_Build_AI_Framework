@@ -1,0 +1,42 @@
+{
+  "thread_id": "h3-after",
+  "status": "answered",
+  "answer": "Available annual leave: 9 days. Approved calendar events: 1.",
+  "citations": [],
+  "evidence": [
+    {
+      "tool": "policy_search",
+      "result": [
+        {
+          "policy_id": "LEAVE-01",
+          "text": "annual leave: Annual leave is charged for Monday through Friday inclusive. Weekends are excluded. Public holidays are not modeled in this workshop. A request must fit the available balance and requires manager approval."
+        },
+        {
+          "policy_id": "LEAVE-02",
+          "text": "carry forward: Employees may carry forward up to 5 unused annual leave days into the next year."
+        }
+      ]
+    },
+    {
+      "tool": "leave_balance",
+      "result": {
+        "employee_id": "E001",
+        "available_days": 9
+      }
+    },
+    {
+      "tool": "mock_calendar",
+      "result": {
+        "events": [
+          {
+            "request_id": "46cb20c0-5210-4ed0-8abd-8ce748fc15f2",
+            "start": "2026-10-05",
+            "end": "2026-10-07",
+            "days": 3
+          }
+        ],
+        "source": "mock calendar"
+      }
+    }
+  ]
+}

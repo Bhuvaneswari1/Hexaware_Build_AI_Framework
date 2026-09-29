@@ -1,0 +1,45 @@
+{
+  "thread_id": "h3-example",
+  "status": "applied",
+  "answer": "Applied 3 working days to the mock calendar.",
+  "citations": [
+    "LEAVE-01"
+  ],
+  "evidence": [
+    {
+      "tool": "policy_search",
+      "result": [
+        {
+          "policy_id": "LEAVE-01",
+          "text": "annual leave: Annual leave is charged for Monday through Friday inclusive. Weekends are excluded. Public holidays are not modeled in this workshop. A request must fit the available balance and requires manager approval."
+        },
+        {
+          "policy_id": "LEAVE-02",
+          "text": "carry forward: Employees may carry forward up to 5 unused annual leave days into the next year."
+        }
+      ]
+    },
+    {
+      "tool": "leave_balance",
+      "result": {
+        "employee_id": "E001",
+        "available_days": 12
+      }
+    },
+    {
+      "tool": "mock_calendar",
+      "result": {
+        "events": [],
+        "source": "mock calendar"
+      }
+    },
+    {
+      "tool": "apply_leave",
+      "result": {
+        "request_id": "46cb20c0-5210-4ed0-8abd-8ce748fc15f2",
+        "days": 3,
+        "deduplicated": false
+      }
+    }
+  ]
+}

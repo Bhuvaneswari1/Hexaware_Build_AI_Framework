@@ -1,0 +1,47 @@
+{
+  "thread_id": "h3-read",
+  "status": "answered",
+  "answer": "annual leave: Annual leave is charged for Monday through Friday inclusive. Weekends are excluded. Public holidays are not modeled in this workshop. A request must fit the available balance and requires manager approval. Available annual leave: 12 days. 2026-09 net pay: INR 82000 (scheduled). Approved calendar events: 0.",
+  "citations": [
+    "LEAVE-01"
+  ],
+  "evidence": [
+    {
+      "tool": "policy_search",
+      "result": [
+        {
+          "policy_id": "LEAVE-01",
+          "text": "annual leave: Annual leave is charged for Monday through Friday inclusive. Weekends are excluded. Public holidays are not modeled in this workshop. A request must fit the available balance and requires manager approval."
+        },
+        {
+          "policy_id": "PAY-01",
+          "text": "payroll: Monthly payroll is scheduled for the last working day of the month. The payroll lookup returns the synthetic current pay record."
+        }
+      ]
+    },
+    {
+      "tool": "leave_balance",
+      "result": {
+        "employee_id": "E001",
+        "available_days": 12
+      }
+    },
+    {
+      "tool": "payroll_lookup",
+      "result": {
+        "employee_id": "E001",
+        "period": "2026-09",
+        "currency": "INR",
+        "net_pay": "82000",
+        "payment_status": "scheduled"
+      }
+    },
+    {
+      "tool": "mock_calendar",
+      "result": {
+        "events": [],
+        "source": "mock calendar"
+      }
+    }
+  ]
+}

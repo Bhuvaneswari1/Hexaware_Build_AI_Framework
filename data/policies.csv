@@ -1,0 +1,5 @@
+policy_id,topic,text
+LEAVE-01,annual leave,"Annual leave is charged for Monday through Friday inclusive. Weekends are excluded. Public holidays are not modeled in this workshop. A request must fit the available balance and requires manager approval."
+LEAVE-02,carry forward,"Employees may carry forward up to 5 unused annual leave days into the next year."
+PAY-01,payroll,"Monthly payroll is scheduled for the last working day of the month. The payroll lookup returns the synthetic current pay record."
+REMOTE-01,remote work,"Employees may work remotely up to 2 days per week with manager agreement."

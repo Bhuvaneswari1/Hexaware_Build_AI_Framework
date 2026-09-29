@@ -1,0 +1,8 @@
+.env
+gha-creds-*.json
+.venv/
+.runtime*/
+__pycache__/
+.pytest_cache/
+*.pyc
+eval-results.json

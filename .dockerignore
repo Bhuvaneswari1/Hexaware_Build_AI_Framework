@@ -1,0 +1,8 @@
+.env
+.venv
+.runtime*
+gha-creds-*.json
+.git
+__pycache__
+.pytest_cache
+*.zip

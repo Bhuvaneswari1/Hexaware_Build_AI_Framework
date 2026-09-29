@@ -1,0 +1,5 @@
+case_id,employee_id,question
+Q1,E001,What is my leave balance?
+Q2,E001,What is the carry forward policy?
+Q3,E001,Show my payroll record.
+Q4,E001,What is the paid sabbatical policy?

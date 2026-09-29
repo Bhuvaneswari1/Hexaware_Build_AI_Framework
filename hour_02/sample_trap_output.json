@@ -1,0 +1,21 @@
+{
+  "thread_id": "h2-trap",
+  "status": "not_in_policy",
+  "answer": "not in policy",
+  "citations": [],
+  "evidence": [
+    {
+      "tool": "policy_search",
+      "result": [
+        {
+          "policy_id": "PAY-01",
+          "text": "payroll: Monthly payroll is scheduled for the last working day of the month. The payroll lookup returns the synthetic current pay record."
+        },
+        {
+          "policy_id": "LEAVE-01",
+          "text": "annual leave: Annual leave is charged for Monday through Friday inclusive. Weekends are excluded. Public holidays are not modeled in this workshop. A request must fit the available balance and requires manager approval."
+        }
+      ]
+    }
+  ]
+}

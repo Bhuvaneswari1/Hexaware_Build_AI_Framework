@@ -1,0 +1,104 @@
+# Hour 2 — Grounding: RAG tool, memory, and structured output
+
+**Use case:** Asha asks how many unused leave days can carry forward, follows up with “What is the limit for that?”, and asks whether a paid sabbatical exists. The four supplied policies support carry-forward but say nothing about sabbaticals.
+
+## 60-minute run sheet
+
+| Time | Topic | Hands-on result |
+|---|---|---|
+| 00–12 | Retrieval, short-term memory, long-term memory, structured output | Identify what belongs in policy evidence versus conversation state |
+| 12–36 | Embed policies and add RAG as a tool | Chroma results include stable policy IDs |
+| 36–60 | Checkpointer, JSON schema, seeded trap | A follow-up retains context; unsupported policy is refused |
+
+## How the use case uses these topics
+
+The model's training knowledge is not the company's policy. `policy_search` retrieves text from `data/policies.csv`; the answer cites its `policy_id`. Each CSV row is one short chunk. In live mode, API embeddings map both policies and a query into vectors, and Chroma returns two candidate passages. Retrieval returns evidence, not a guarantee that a passage answers the question.
+
+Short-term memory is the message history persisted for an employee/thread. It helps resolve “that” in a follow-up. Long-term memory would store preferences or facts across separate conversations; it is discussed here but intentionally not implemented. The policy collection is a knowledge base, not personal memory.
+
+## Lab A — Index and retrieve
+
+1. Complete the root setup. Begin with `HR_MODE=demo`.
+2. Inspect `data/policies.csv`: `LEAVE-01`, `LEAVE-02`, `PAY-01`, `REMOTE-01`.
+3. Build the index:
+
+   ```bash
+   python -m hr_agent.retrieval
+   ```
+
+   Expected: `Indexed four synthetic HR policies.`
+
+4. Run:
+
+   ```bash
+   python -m hour_02.app "What is the carry forward policy?" --thread h2-memory
+
+   “What does our policy say about carrying forward annual leave? And what did I ask you earlier?”
+“How many unused annual leave days can carry forward? And what was my previous question?”
+“What does the policy say about taking annual leave on weekends? And what did I ask you before?”
+“What is the remote-work limit in our policy? And what was I asking about earlier?”
+“When is monthly payroll scheduled? And what did I ask you earlier?”
+“What does our policy say about annual leave and manager approval? And what was my first question in this conversation?”
+
+   ```
+
+5. Expect:
+
+   ```json
+   {
+     "status":"answered",
+     "answer":"carry forward: Employees may carry forward up to 5 unused annual leave days into the next year.",
+     "citations":["LEAVE-02"]
+   }
+   ```
+
+   The full executed response is in `sample_output.json`. Inspect the retrieved passages in `evidence`; some results may be irrelevant candidates.
+
+6. Switch `.env` to `HR_MODE=live`, supply your API key, rerun the index command, and repeat. The application maintains separate demo/live collections to prevent mixing embedding dimensions. This step performs real API embedding calls.
+
+7. Inspect `tools_for(employee, 2)`. The retriever is a tool available alongside balance and date calculation. In live mode the agent chooses when to call it. It is not injected into every request automatically.
+
+## Lab B — Memory and the missing-policy trap
+
+1. In the same mode, run a follow-up using the same thread:
+
+   ```bash
+   python -m hour_02.app "What is the limit for that?" --thread h2-memory
+   ```
+
+2. Expect an answer about the 5-day carry-forward limit, with `LEAVE-02`. The CLI is a new process, so this also demonstrates checkpoint persistence across restart.
+3. Inspect `service.py`: Hour 2 uses `SqliteSaver` under `h2:E001:h2-memory`. A different employee or thread has a different history. Hour 1 does not persist conversation history.
+4. Trigger the seeded trap:
+
+   ```bash
+   python -m hour_02.app "What is the paid sabbatical policy?" --thread h2-trap
+   ```
+
+5. Expected:
+
+   ```json
+   {"status":"not_in_policy","answer":"not in policy","citations":[]}
+   ```
+
+   See `sample_trap_output.json`. A passage about annual leave is not evidence for sabbatical entitlement. In live mode, refusal is a model behavior that the Hour 4 evaluator checks; schema validation alone cannot prove factual grounding.
+6. Open `schema.py` and `answers.py`. `Answer` constrains status, answer text, citation list, and evidence. Live output rejects citation IDs absent from the retrieved passages. This prevents invented IDs; verifying that a passage actually supports each claim remains an evaluation task.
+
+```mermaid
+flowchart TD
+    Q[Question plus thread history] --> L[Agent decides next tool]
+    L --> R[policy_search]
+    R --> C[Chroma: two candidate passages]
+    C --> L
+    L --> A[Structured answer]
+    A --> K[Check citation IDs and schema]
+    K --> O[Answer with citations or not in policy]
+```
+
+## Checks and discussion
+
+- Change the carry-forward number in the CSV, reindex in a new process, and restart the server if running. Verify the live answer changes; restore the CSV before the five-case evaluation.
+- Treat policy text and tool results as untrusted data. A sentence inside a document cannot grant tool access, approve leave, or change the authenticated employee.
+- Try an unrelated question in live mode and inspect the refusal. Record any failure as an evaluation example.
+- Do not treat the local hash embeddings as production semantic retrieval. They exist to exercise Chroma without a model account.
+
+Hour 3 reuses the policy agent as one specialist, adds a records specialist, and places an approval gate after evidence collection.

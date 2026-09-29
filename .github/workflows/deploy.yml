@@ -1,0 +1,71 @@
+name: Build, deploy candidate, evaluate, promote
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: hr-cloud-workshop
+  cancel-in-progress: false
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION }}
+  REPOSITORY: hr-workshop
+  HR_EMPLOYEE_API_KEY: ${{ secrets.HR_EMPLOYEE_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+  LANGSMITH_PROJECT: hr-agent-ci
+  LANGSMITH_TRACING: 'true'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests -q
+      - uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+      - uses: google-github-actions/setup-gcloud@v3
+      - name: Build immutable image
+        run: |
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/hr-agent:$GITHUB_SHA"
+          gcloud auth configure-docker "$REGION-docker.pkg.dev" --quiet
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+      - name: Deploy isolated candidate
+        run: |
+          gcloud run deploy hr-agent-candidate --project "$PROJECT_ID" --region "$REGION" \
+            --image "$IMAGE" --allow-unauthenticated --memory 2Gi --cpu 1 --max-instances 1 \
+            --concurrency 1 --timeout 300 --service-account '${{ vars.GCP_RUNTIME_SA }}' \
+            --set-env-vars HR_MODE=live,HR_READ_ONLY=true,LANGSMITH_TRACING=true,LANGSMITH_PROJECT=hr-agent-cloud \
+            --set-secrets OPENAI_API_KEY=hr-openai:latest,LANGSMITH_API_KEY=hr-langsmith:latest,HR_EMPLOYEE_API_KEY=hr-employee:latest --quiet
+          URL=$(gcloud run services describe hr-agent-candidate --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          echo "HR_BASE_URL=$URL" >> "$GITHUB_ENV"
+      - name: Smoke test live candidate
+        run: python -m pytest hour_04/test_live.py -q
+      - name: Five-case LangSmith quality gate
+        run: python -m hour_04.evaluate
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: langsmith-evaluation-report
+          path: eval-results.json
+          if-no-files-found: warn
+      - name: Promote tested image
+        run: |
+          gcloud run deploy hr-agent --project "$PROJECT_ID" --region "$REGION" \
+            --image "$IMAGE" --allow-unauthenticated --memory 2Gi --cpu 1 --max-instances 1 \
+            --concurrency 1 --timeout 300 --service-account '${{ vars.GCP_RUNTIME_SA }}' \
+            --set-env-vars HR_MODE=live,HR_READ_ONLY=true,LANGSMITH_TRACING=true,LANGSMITH_PROJECT=hr-agent-cloud \
+            --set-secrets OPENAI_API_KEY=hr-openai:latest,LANGSMITH_API_KEY=hr-langsmith:latest,HR_EMPLOYEE_API_KEY=hr-employee:latest --quiet
+          URL=$(gcloud run services describe hr-agent --project "$PROJECT_ID" --region "$REGION" --format='value(status.url)')
+          echo "HR_BASE_URL=$URL" >> "$GITHUB_ENV"
+          echo "Verified candidate promoted to $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Smoke test promoted endpoint
+        run: python -m pytest hour_04/test_live.py -q

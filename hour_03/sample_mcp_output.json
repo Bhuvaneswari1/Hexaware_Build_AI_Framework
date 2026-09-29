@@ -1,0 +1,37 @@
+{
+  "external_tools": [
+    "mock_calendar"
+  ],
+  "observations": [
+    {
+      "tool": "leave_balance",
+      "result": {
+        "employee_id": "E001",
+        "available_days": 9
+      }
+    },
+    {
+      "tool": "policy_search",
+      "result": [
+        {
+          "policy_id": "LEAVE-01",
+          "text": "annual leave: Annual leave is charged for Monday through Friday inclusive. Weekends are excluded. Public holidays are not modeled in this workshop. A request must fit the available balance and requires manager approval."
+        },
+        {
+          "policy_id": "LEAVE-02",
+          "text": "carry forward: Employees may carry forward up to 5 unused annual leave days into the next year."
+        }
+      ]
+    },
+    {
+      "tool": "mock_calendar",
+      "result": [
+        {
+          "type": "text",
+          "text": "{\n  \"events\": [\n    {\n      \"request_id\": \"46cb20c0-5210-4ed0-8abd-8ce748fc15f2\",\n      \"start\": \"2026-10-05\",\n      \"end\": \"2026-10-07\",\n      \"days\": 3\n    }\n  ],\n  \"source\": \"mock calendar\"\n}",
+          "id": "lc_72e82d68-1d81-4c1c-8d25-61e4e89c7b70"
+        }
+      ]
+    }
+  ]
+}

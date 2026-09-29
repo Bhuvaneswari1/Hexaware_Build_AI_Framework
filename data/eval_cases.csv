@@ -1,0 +1,6 @@
+case_id,question,expected_status,reference,required_citation
+balance,What is my leave balance?,answered,Available annual leave is 12 days.,
+carry,What is the carry forward policy?,answered,Up to 5 unused annual leave days may be carried into the next year.,LEAVE-02
+remote,What is the remote work policy?,answered,Up to 2 remote days per week with manager agreement.,REMOTE-01
+payroll,Show my payroll record.,answered,September 2026 net pay is INR 82000 with status scheduled.,
+trap,What is the paid sabbatical policy?,not_in_policy,not in policy,

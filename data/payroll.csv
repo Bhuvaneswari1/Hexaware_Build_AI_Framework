@@ -1,0 +1,4 @@
+employee_id,period,currency,net_pay,payment_status
+E001,2026-09,INR,82000,scheduled
+E002,2026-09,INR,76000,scheduled
+E003,2026-09,INR,91000,scheduled

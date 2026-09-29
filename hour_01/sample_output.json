@@ -1,0 +1,23 @@
+{
+  "thread_id": "h1-example",
+  "status": "answered",
+  "answer": "Available annual leave: 12 days. Requested working days: 3.",
+  "citations": [],
+  "evidence": [
+    {
+      "tool": "leave_balance",
+      "result": {
+        "employee_id": "E001",
+        "available_days": 12
+      }
+    },
+    {
+      "tool": "date_calculator",
+      "result": {
+        "start": "2026-10-05",
+        "end": "2026-10-07",
+        "working_days": 3
+      }
+    }
+  ]
+}
